@@ -18,51 +18,69 @@ This is a script I made up to grab the most recent version from `stepmania`'s `m
 	#!/bin/bash
 
 	# Locations
-	export DT_UPSTREAM_URL=https://github.com/stepmania/stepmania.git
-	export DT_UPSTREAM_DIR="$HOME/src/stepmania-default-theme_upstream"
-	export DT_UPSTREAM_SUBDIR="Themes/default/"
-	export DT_ORIGIN_URL=git@github.com:psmay/stepmania-default-theme.git
-	export DT_ORIGIN_DIR="$HOME/prj/stepmania-default-theme"
 
-	echo "$DT_UPSTREAM_DIR"
+	# The "parent" repo is just the stepmania/stepmania repo. Our local clone of
+	# this repo will be configured as a sparse checkout configured to check out
+	# only the Themes/default part.
+	parent_url=https://github.com/stepmania/stepmania.git
+	parent_branch=master
+	parent_dir="$HOME/src/stepmania-default-theme_parent"
+	parent_subdir="Themes/default/"
 
-	firsttime () {
-		# Create the proto-repo
-		git init "$DT_UPSTREAM_DIR" &&
+	# The "theme" repo is the psmay/stepmania-default-theme repo. Its basic
+	# layout is intended to mimic what would happen if you checked out the
+	# parent repo, copied its Themes/default to a new location, and started a
+	# new repo inside that copy.
+	theme_url=git@github.com:psmay/stepmania-default-theme.git
+	theme_dir="$HOME/prj/stepmania-default-theme"
+	theme_branch=master
+
+	bq='`'
+
+	# To be run the first time; sets up local checkouts
+	initial_setup () {
+		# Create the parent repo.
+		git init "$parent_dir" &&
 		(
-			cd "$DT_UPSTREAM_DIR" &&
-			git remote add origin "$DT_UPSTREAM_URL" &&
+			cd "$parent_dir" &&
+			git remote add origin "$parent_url" &&
 			git config core.sparsecheckout true &&
-			echo "$DT_UPSTREAM_SUBDIR" >> .git/info/sparse-checkout
-		)
+			echo "$parent_subdir" >> .git/info/sparse-checkout
+		) &&
 
-		# Clone this repo
-		git clone -b master "$DT_ORIGIN_URL" "$DT_ORIGIN_DIR"
+		# Clone the theme repo.
+		git clone -b "$theme_branch" "$theme_url" "$theme_dir"
 	}
 
-	everytime () {
-		# Update the proto-repo
+	# To be run at least every time the theme is updated in the parent
+	update () {
+		# Update the parent repo
 		(
-			cd "$DT_UPSTREAM_DIR" &&
-			git pull origin master &&
+			cd "$parent_dir" &&
+			git pull origin "$parent_branch" &&
 			git clean -f -d -x
-		)
+		) &&
 
-		# Replace this repo's files with the proto-repo
+		# Replace theme repo's files with the parent repo
 		rsync -avz \
 			--exclude README.md \
 			--exclude .git \
-			--delete "$DT_UPSTREAM_DIR/$DT_UPSTREAM_SUBDIR" "$DT_ORIGIN_DIR/"
+			--delete "$parent_dir/$parent_subdir" "$theme_dir/" &&
 
-		# Check it in
+		# Think of a commit message
+		current_date="`date -u -Iseconds`" &&
+		commit_msg="Refreshed from $bq$parent_url$bq @ $bq$current_date$bq" &&
+
+		# Check in and push the changes
+		# (If nothing changed, no commit will occur)
 		(
-			cd "$DT_ORIGIN_DIR" &&
+			cd "$theme_dir" &&
 			git add -A &&
-			git commit
+			git commit -m "$commit_msg" &&
+			git push
 		)
-
-		# And, if it seems right at this point, push it.
 	}
 
-	# firsttime
-	everytime
+	# initial_setup &&
+	update
+
