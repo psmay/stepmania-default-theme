@@ -1,7 +1,7 @@
 
 # StepMania default theme
 
-This is a repo to track only (the `Themes/default` directory within the `stepmania` project)[https://github.com/stepmania/stepmania/tree/master/Themes/default]. The idea is to be able to fork this repo, create a `default`-based theme, and then be able to observe the relative changes made and merge in improvements made to `default` as they are added.
+This is a repo to track only [the `Themes/default` directory within the `stepmania` project](https://github.com/stepmania/stepmania/tree/master/Themes/default). The idea is to be able to fork this repo, create a `default`-based theme, and then be able to observe the relative changes made and merge in improvements made to `default` as they are added.
 
 # How to use
 
@@ -9,7 +9,7 @@ Fork this repo, change some things, replace this `README.md` with something rele
 
 # Authors and License
 
-This repo consists solely of content created/aggregated by the authors of (the `stepmania` project)[https://github.com/stepmania/stepmania]. Please refer to that project for licensing details.
+This repo consists solely of content created/aggregated by the authors of [the `stepmania` project](https://github.com/stepmania/stepmania). Please refer to that project for licensing details.
 
 # Keeping this repo updated
 
